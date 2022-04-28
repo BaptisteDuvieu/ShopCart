@@ -17,16 +17,36 @@ public class ShopCart extends HttpServlet {
 
     private List<Product> products;
     public void init() {
-
         products = new ArrayList<Product>();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
 
+        handleGetRequests(request);
+
         response.setContentType("text/html");
 
         returnPage(request, response);
+    }
+
+    private void handleGetRequests(HttpServletRequest request) {
+        String refProductToBeDelete = request.getParameter("deleteReference");
+
+        if( refProductToBeDelete != null ){
+            HttpSession session = request.getSession();
+            List<Product> products = (List<Product>) session.getAttribute("products");
+            List<Product> productsSession = (List<Product>) session.getAttribute("products");
+
+            if(null != productsSession)
+            {
+                products.removeIf((Product p) -> refProductToBeDelete.equals(p.getReference()));
+
+                if(products.isEmpty()) session.invalidate();
+                else session.setAttribute("products", products);
+            }
+        }
+
     }
 
     protected void doPost(HttpServletRequest request,
@@ -78,7 +98,6 @@ public class ShopCart extends HttpServlet {
         htmlResponse += "<hr/>";
 
 
-
         HttpSession session = request.getSession(false);
         if (session != null) {
 
@@ -92,7 +111,7 @@ public class ShopCart extends HttpServlet {
 
                 htmlResponse += "<ul>";
                 for (Product p : products) {
-                    htmlResponse += "<li>" + p.getReference() + " | " + p.getNom() + " | " + p.getPrix() + "</li>";
+                    htmlResponse += "<li>" + p.getReference() + " | " + p.getNom() + " | " + p.getPrix() + " | <a href='my-cart?deleteReference=" + p.getReference() + "'>" + p.getReference() + "</a></li>";
                     totalCommande += p.getPrix();
                 }
 
