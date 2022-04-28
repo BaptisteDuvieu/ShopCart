@@ -37,17 +37,16 @@ public class ShopCart extends HttpServlet {
         String nom = request.getParameter("nom");
         Integer prix = Integer.parseInt(request.getParameter("prix"));
 
-        products = new ArrayList<Product>();
         // do some processing here...
+        HttpSession session = request.getSession();
+        List<Product> productsSession = (List<Product>) session.getAttribute("products");
+        if(productsSession == null ) products = new ArrayList<Product>();
+
         products.add(new Product( reference, nom, prix));
 
-        HttpSession session = request.getSession();
         session.setAttribute("products", products);
 
-
         doGet(request, response);
-
-
     }
 
     private void returnPage(HttpServletRequest request,
