@@ -49,6 +49,8 @@ public class ShopCart extends HttpServlet {
         doGet(request, response);
     }
 
+
+
     private void returnPage(HttpServletRequest request,
                             HttpServletResponse response) throws IOException {
         // get response writer
@@ -75,26 +77,42 @@ public class ShopCart extends HttpServlet {
                 "</form>";
         htmlResponse += "<hr/>";
 
+
+
         HttpSession session = request.getSession(false);
         if (session != null) {
-            htmlResponse += "<h2>Liste des produits:</h2>";
+
 
             List<Product> productsSession = (List<Product>) session.getAttribute("products");
+            Integer totalCommande = 0;
 
             if(null != productsSession)
             {
+                htmlResponse += "<h2>Liste des produits:</h2>";
+
                 htmlResponse += "<ul>";
                 for (Product p : products) {
                     htmlResponse += "<li>" + p.getReference() + " | " + p.getNom() + " | " + p.getPrix() + "</li>";
+                    totalCommande += p.getPrix();
                 }
+
                 htmlResponse += "</ul>";
+
+                int fraisDePort;
+
+                if(totalCommande < 50) fraisDePort = 5;
+                else if(totalCommande > 50 && totalCommande < 100) fraisDePort = 8;
+                else fraisDePort = 0;
+
+                if(fraisDePort > 0 ) htmlResponse += "<h2>Frais de port pour la commande : " + fraisDePort + "euros. </h2>";
+                else htmlResponse += "<h2>Les frais de port sont offerts!</h2>";
+
+
+                htmlResponse += "<hr/>";
             }
 
-            htmlResponse += "<hr/>";
-        } else {
-            // no session
-        }
 
+        }
 
         htmlResponse += "</body></html>";
 
