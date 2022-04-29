@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet(name = "shopCart", value = "/my-cart")
+@WebServlet(name = "shopCart", value = "/shop")
 
 public class ShopCart extends HttpServlet {
 
@@ -27,7 +27,10 @@ public class ShopCart extends HttpServlet {
 
         response.setContentType("text/html");
 
-        returnPage(request, response);
+        PrintWriter writer = response.getWriter();
+
+        // return response
+        writer.println("<script>window.location.replace('/ShopCart-1.0-SNAPSHOT/')</script>");
     }
 
     private void handleGetRequests(HttpServletRequest request) {
@@ -71,72 +74,71 @@ public class ShopCart extends HttpServlet {
 
 
 
-    private void returnPage(HttpServletRequest request,
-                            HttpServletResponse response) throws IOException {
-        // get response writer
-        PrintWriter writer = response.getWriter();
+    public static String returnShippingFee( HttpServletRequest request ){
+        int fraisDePort;
+        int totalCommande = ShopCart.returnPrice(request);
+        if(totalCommande < 50) fraisDePort = 5;
+        else if(totalCommande > 50 && totalCommande < 100) fraisDePort = 8;
+        else fraisDePort = 0;
 
-        // build HTML code
-        // Hello
-        PrintWriter out = response.getWriter();
+        if(fraisDePort > 0 ) return "<h2>Frais de port pour la commande : " + fraisDePort + "euros. </h2>";
+        else return "<h2>Les frais de port sont offerts!</h2>";
+    }
 
-
-        String htmlResponse = "<html><body>";
-
-        htmlResponse += "<h1>My ShopCart</h1>";
-
-        htmlResponse += "<hr/>";
-
-        htmlResponse += "<h2>Ajouter un produit:</h2>";
-
-        htmlResponse += "<form name=\"addProduct\" method=\"post\" action=\"my-cart\">\n" +
-                "    Référence: <input type=\"text\" name=\"reference\"/> <br/>\n" +
-                "    Nom: <input type=\"text\" name=\"nom\"/> <br/>\n" +
-                "    Prix: <input type=\"text\" name=\"prix\"/> <br/>\n" +
-                "    <input type=\"submit\" value=\"Insert\" />\n" +
-                "</form>";
-        htmlResponse += "<hr/>";
-
-
+    public static boolean hasProduct( HttpServletRequest request ){
         HttpSession session = request.getSession(false);
+        String htmlResponse = "";
+
         if (session != null) {
 
+            List<Product> productsSession = (List<Product>) session.getAttribute("products");
+            Integer totalCommande = 0;
+
+            if (null != productsSession) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String returnListProducts( HttpServletRequest request ){
+        HttpSession session = request.getSession(false);
+        String htmlResponse = "";
+
+        if (session != null) {
 
             List<Product> productsSession = (List<Product>) session.getAttribute("products");
             Integer totalCommande = 0;
 
             if(null != productsSession)
             {
-                htmlResponse += "<h2>Liste des produits:</h2>";
 
-                htmlResponse += "<ul>";
-                for (Product p : products) {
-                    htmlResponse += "<li>" + p.getReference() + " | " + p.getNom() + " | " + p.getPrix() + " | <a href='my-cart?deleteReference=" + p.getReference() + "'>" + p.getReference() + "</a></li>";
+                for (Product p : productsSession) {
+
+                    htmlResponse += "<li>"  + p.getReference()  + " | "
+                            + p.getNom()        + " | "
+                            + p.getPrix()       + " | "
+                            + "<a href='shop?deleteReference=" + p.getReference()  + "'>Supprimer : " + p.getReference() + "</a></li>";
+
                     totalCommande += p.getPrix();
                 }
-
-                htmlResponse += "</ul>";
-
-                int fraisDePort;
-
-                if(totalCommande < 50) fraisDePort = 5;
-                else if(totalCommande > 50 && totalCommande < 100) fraisDePort = 8;
-                else fraisDePort = 0;
-
-                if(fraisDePort > 0 ) htmlResponse += "<h2>Frais de port pour la commande : " + fraisDePort + "euros. </h2>";
-                else htmlResponse += "<h2>Les frais de port sont offerts!</h2>";
-
-
-                htmlResponse += "<hr/>";
             }
+            return htmlResponse;
+        }
+        return "";
+    }
 
+    public static int returnPrice( HttpServletRequest request ){
+        HttpSession session = request.getSession(false);
+        int totalCommande = 0;
+
+        if (session != null) {
+            List<Product> productsSession = (List<Product>) session.getAttribute("products");
+
+            if(null != productsSession) { for (Product p : productsSession) { totalCommande += p.getPrix(); } }
 
         }
-
-        htmlResponse += "</body></html>";
-
-        // return response
-        writer.println(htmlResponse);
+        return totalCommande;
     }
 
 
