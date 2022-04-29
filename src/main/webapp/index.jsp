@@ -1,41 +1,70 @@
 <%@ page import="com.bduvieu.shopcart.Product" %>
 <%@ page import="com.bduvieu.shopcart.ShopCart" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Mon Panier Interactif</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" >
 </head>
 <body>
-<h1>My ShopCart</h1>
+<h1>Mon Panier Interactif</h1>
+<h4>Baptiste DUVIEU</h4>
+<hr/>
+
+
+<main class="container">
+    <div class="bg-light p-5 rounded">
+        <h2>Ajouter un produit:</h2>
+        <form class="form-group" name="addProduct" method="post" action="shop">
+            <label for="reference">Référence: </label>
+            <input class="form-control" type="text" id="reference" name="reference"/>
+
+            <label for="nom">Nom: </label>
+            <input class="form-control" type="text" id="nom" name="nom"/>
+
+            <label for="prix">Prix: </label>
+            <input class="form-control" type="text" id="prix" name="prix"/>
+
+            <input class="btn btn-primary" type="submit" value="Insérer"/>
+        </form>
+    </div>
+</main>
+
+
 
 <hr/>
 
-<h2>Ajouter un produit:</h2>
+<% if (ShopCart.hasProduct(request)) { %>
 
-<form name="addProduct" method="post" action="shop">
-    <label for="reference">Référence: </label><br>
-    <input type="text" id="reference" name="reference"/> <br/>
 
-    <label for="nom">Nom: </label><br>
-    <input type="text" id="nom" name="nom"/> <br/>
+<main class="container">
+    <div class="bg-light p-5 rounded">
+        <h2>Liste des produits:</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Référence</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Prix</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+                <%= ShopCart.returnListProducts(request) %>
+            </tbody>
+        </table>
 
-    <label for="prix">Prix: </label><br>
-    <input type="text" id="prix" name="prix"/> <br/>
+        <div class="alert alert-secondary" role="alert">
+            <%= ShopCart.returnShippingFee(request)  %>
+        </div>
 
-    <input type="submit" value="Insérer"/>
-</form>
 
-<hr/>
+    </div>
+</main>
 
-<% if (ShopCart.hasProduct( request ) ) { %>
 
-<h2>Liste des produits:</h2>
 
-<ul>
-    <%= ShopCart.returnListProducts(request) %>
-</ul>
 
-<%= ShopCart.returnShippingFee( request )  %>
 <hr/>
 <% } %>
 
